@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTS PAI Kelas 6</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+      body { font-family: 'Poppins', sans-serif; }
+      .hidden { display: none !important; }
+      .fade-in { animation: fadeIn 0.5s ease-in-out; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+  </head>
+  <body class="bg-emerald-50 text-gray-800 min-h-screen">
+
+    <!-- LOADING SPINNER -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center hidden">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-emerald-600"></div>
+      <p class="mt-4 text-emerald-600 font-bold">Memproses Data...</p>
+    </div>
+
+    <!-- 1. HALAMAN WELCOME -->
+    <div id="page-welcome" class="min-h-screen flex flex-col items-center justify-center p-4">
+      <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border-t-8 border-emerald-600 fade-in">
+        <div class="text-center mb-8">
+          <i class="fas fa-book-open text-6xl text-emerald-600 mb-4"></i>
+          <h1 class="text-2xl font-bold text-gray-800">UTS PAI & Budi Pekerti</h1>
+          <p class="text-emerald-600 font-medium">Kelas VI Semester 1</p>
+          <p class="text-gray-500 text-sm mt-2">Bab 6, 7, dan 8</p>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap Siswa</label>
+            <div class="relative">
+              <i class="fas fa-user absolute left-3 top-3 text-gray-400"></i>
+              <input type="text" id="input-nama" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Masukkan namamu...">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
+            <div class="relative">
+              <i class="fas fa-users absolute left-3 top-3 text-gray-400"></i>
+              <select id="input-kelas" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
+                <option value="6A">Kelas 6A</option>
+                <option value="6B">Kelas 6B</option>
+              </select>
+            </div>
+          </div>
+
+          <button onclick="startQuiz()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg transition-all shadow-md flex items-center justify-center gap-2 mt-4">
+            Mulai Mengerjakan <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. HALAMAN KUIS -->
+    <div id="page-quiz" class="min-h-screen flex flex-col hidden">
+      <!-- Header -->
+      <div class="bg-white shadow-sm p-4 sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <div id="display-kelas" class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 font-bold text-sm">6A</div>
+            <div>
+              <h2 id="display-nama" class="font-bold text-gray-800 text-sm md:text-base">Siswa</h2>
+              <div class="text-xs text-gray-500 flex items-center gap-1">
+                <i class="far fa-clock"></i> <span id="timer">0:00</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-gray-500">Soal</span>
+            <p class="font-bold text-xl text-emerald-600"><span id="current-number">1</span><span class="text-sm text-gray-400 font-normal" id="total-number">/40</span></p>
+          </div>
+        </div>
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-200 h-2 mt-4 rounded-full overflow-hidden">
+          <div id="progress-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Question Container -->
+      <div class="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 fade-in" id="question-container">
+        <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 min-h-[400px] flex flex-col">
+          <div class="mb-4">
+            <span id="badge-level" class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-600">Mudah</span>
+            <span id="badge-category" class="ml-2 text-xs text-gray-400 uppercase tracking-wider">Bab 6</span>
+          </div>
+
+          <h3 id="question-text" class="text-lg md:text-2xl font-medium text-gray-800 mb-6 leading-relaxed">Pertanyaan...</h3>
+          
+          <div id="dalil-box" class="hidden mb-8 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg">
+            <p id="dalil-text" class="text-right font-serif text-2xl text-emerald-800 leading-loose mb-2">...</p>
+            <p class="text-xs text-emerald-600 italic">Dalil / Referensi</p>
+          </div>
+
+          <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-auto">
+            <!-- Options generated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Nav -->
+      <div class="bg-white border-t p-4 mt-auto">
+        <div class="max-w-4xl mx-auto flex justify-between">
+          <button onclick="prevQuestion()" id="btn-prev" class="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fas fa-chevron-left"></i> Sebelumnya
+          </button>
+          <button onclick="nextQuestion()" id="btn-next" class="flex items-center gap-2 px-6 py-2 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-900">
+            Selanjutnya <i class="fas fa-chevron-right"></i>
+          </button>
+          <button onclick="finishQuiz()" id="btn-finish" class="hidden flex items-center gap-2 px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-200">
+            Selesai <i class="fas fa-check-circle"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. HALAMAN HASIL -->
+    <div id="page-result" class="min-h-screen bg-gray-100 py-12 px-4 flex items-center justify-center hidden">
+      <div class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden relative fade-in">
+        <div id="result-header" class="h-32 bg-emerald-500 flex items-center justify-center">
+          <i id="result-icon" class="fas fa-check-circle text-white text-6xl opacity-80"></i>
+        </div>
+        
+        <div class="px-8 py-8 text-center -mt-16 relative">
+          <div class="w-32 h-32 bg-white rounded-full mx-auto flex items-center justify-center shadow-lg mb-6">
+            <div class="text-center">
+              <span id="final-score" class="block text-4xl font-extrabold text-gray-800">0</span>
+              <span class="text-xs text-gray-400 uppercase font-bold tracking-wide">Skor Akhir</span>
+            </div>
+          </div>
+          
+          <h2 id="result-title" class="text-2xl font-bold text-gray-800 mb-2">Alhamdulillah!</h2>
+          <p id="result-message" class="text-gray-600 mb-8">Selamat telah menyelesaikan ujian.</p>
+
+          <div class="grid grid-cols-2 gap-4 text-left bg-gray-50 p-6 rounded-xl mb-6 text-sm md:text-base">
+            <div><p class="text-gray-500 text-xs">Nama</p><p class="font-bold" id="res-nama">-</p></div>
+            <div><p class="text-gray-500 text-xs">Kelas</p><p class="font-bold" id="res-kelas">-</p></div>
+            <div><p class="text-gray-500 text-xs">Waktu</p><p class="font-bold" id="res-waktu">-</p></div>
+            <div><p class="text-gray-500 text-xs">Status</p><p class="font-bold" id="res-status">-</p></div>
+          </div>
+
+          <div class="flex gap-4 flex-col md:flex-row">
+            <button onclick="showLeaderboard()" class="flex-1 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold transition shadow-md flex items-center justify-center gap-2">
+              <i class="fas fa-trophy"></i> Lihat Peringkat
+            </button>
+            <button onclick="location.reload()" class="flex-1 py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-xl font-bold transition shadow-md flex items-center justify-center gap-2">
+              <i class="fas fa-redo"></i> Ujian Ulang
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. HALAMAN LEADERBOARD -->
+    <div id="page-leaderboard" class="min-h-screen bg-emerald-50 py-12 px-4 hidden">
+      <div class="max-w-3xl mx-auto fade-in">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div class="bg-emerald-600 p-8 text-center text-white">
+            <i class="fas fa-trophy text-5xl text-yellow-300 mb-4"></i>
+            <h1 class="text-3xl font-bold">Peringkat Kelas 6</h1>
+            <p class="text-emerald-100">Top 10 Skor Tertinggi</p>
+          </div>
+
+          <div class="p-6">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="border-b-2 border-emerald-100 text-emerald-800">
+                    <th class="p-4 font-bold">#</th>
+                    <th class="p-4 font-bold">Nama</th>
+                    <th class="p-4 font-bold">Kls</th>
+                    <th class="p-4 font-bold">Waktu</th>
+                    <th class="p-4 font-bold text-right">Skor</th>
+                  </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                  <tr><td colspan="5" class="text-center p-4">Memuat data...</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="mt-8 text-center">
+              <button onclick="location.reload()" class="px-8 py-3 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition">
+                Kembali ke Utama
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+      // --- DATABASE SOAL (40 Soal) ---
+      const questionsDatabase = [
+        { id: 1, category: "Bab 6: Surat Al-A'la", question: "Surat Al-A'la terdiri dari berapa ayat?", options: { A: "17 Ayat", B: "18 Ayat", C: "19 Ayat", D: "20 Ayat" }, correct: "C", level: "Mudah", dalil: "" },
+        { id: 2, category: "Bab 6: Surat Al-A'la", question: "Apa arti dari nama surat 'Al-A'la'?", options: { A: "Waktu Dhuha", B: "Yang Maha Tinggi", C: "Malam Kemuliaan", D: "Gugusan Bintang" }, correct: "B", level: "Mudah", dalil: "سَبِّحِ ٱسۡمَ رَبِّكَ ٱلۡأَعۡلَى" },
+        { id: 3, category: "Bab 6: Surat Al-A'la", question: "Surat Al-A'la tergolong ke dalam surat Makkiyah karena...", options: { A: "Diturunkan di Madinah", B: "Diturunkan sebelum Nabi hijrah", C: "Berisi hukum perang", D: "Ayatnya sangat panjang" }, correct: "B", level: "Sedang", dalil: "" },
+        { id: 4, category: "Bab 6: Surat Al-A'la", question: "Lanjutan ayat berikut adalah: \n'Sabbihisma rabbika...'", options: { A: "Al-Akram", B: "Al-A'la", C: "Al-Khaliq", D: "Al-Mulk" }, correct: "B", level: "Mudah", dalil: "سَبِّحِ ٱسۡمَ رَبِّكَ ...." },
+        { id: 5, category: "Bab 6: Surat Al-A'la", question: "Pada ayat ke-14 berbunyi 'Qad aflaha man tazakka'. Makna 'Tazakka' dalam ayat tersebut berhubungan dengan...", options: { A: "Orang yang menyucikan diri (beriman)", B: "Orang yang bersedekah", C: "Orang yang berpuasa", D: "Orang yang berperang" }, correct: "A", level: "Sedang", dalil: "قَدۡ أَفۡلَحَ مَن تَزَكَّىٰ" },
+        { id: 6, category: "Bab 6: Surat Al-A'la", question: "Perhatikan ayat 6: 'Sanuqri'uka falaa tansaa'. Janji Allah kepada Nabi Muhammad saw. dalam ayat ini adalah...", options: { A: "Diberikan kekayaan melimpah", B: "Dimudahkan dalam menghafal Al-Qur'an dan tidak lupa", C: "Dimenangkan dalam peperangan", D: "Dijadikan raja di Mekah" }, correct: "B", level: "HOTS", dalil: "سَنُقۡرِئُكَ فَلَا تَنسَىٰٓ" },
+        { id: 7, category: "Bab 6: Surat Al-A'la", question: "Hukum bacaan pada lafadz 'Min ghassaq' (jika terdapat nun mati bertemu ghain) adalah...", options: { A: "Idgham Bighunnah", B: "Ikhfa", C: "Izhar Halqi", D: "Iqlab" }, correct: "C", level: "Sedang", dalil: "(Contoh Kaidah Tajwid Umum)" },
+        { id: 8, category: "Bab 6: Surat Al-A'la", question: "Dalam Surat Al-A'la disebutkan bahwa keberuntungan bagi orang yang beriman adalah jika ia...", options: { A: "Mengingat Allah dan mendirikan shalat", B: "Bekerja keras siang malam", C: "Menumpuk harta benda", D: "Memiliki jabatan tinggi" }, correct: "A", level: "Sedang", dalil: "وَذَكَرَ ٱسۡمَ رَبِّهِۦ فَصَلَّىٰ" },
+        { id: 9, category: "Bab 6: Surat Al-A'la", question: "Ayat terakhir (ayat 19) surat Al-A'la menyebutkan bahwa ajaran ini juga terdapat dalam kitab-kitab terdahulu, yaitu suhuf...", options: { A: "Musa dan Isa", B: "Ibrahim dan Musa", C: "Daud dan Sulaiman", D: "Adam dan Nuh" }, correct: "B", level: "Mudah", dalil: "صُحُفِ إِبۡرَٰهِيمَ وَمُوسَىٰ" },
+        { id: 10, category: "Bab 6: Surat Al-A'la", question: "Salah satu pokok kandungan Surat Al-A'la adalah perintah untuk...", options: { A: "Berbuat baik kepada tetangga", B: "Menyucikan nama Allah Yang Maha Tinggi", C: "Membayar zakat fitrah", D: "Melaksanakan haji" }, correct: "B", level: "Sedang", dalil: "" },
+        { id: 11, category: "Bab 6: Surat Al-A'la", question: "Sikap yang mencerminkan pengamalan Surat Al-A'la dalam kehidupan sehari-hari adalah...", options: { A: "Sombong dengan hafalan Qur'an", B: "Selalu berdzikir dan menjaga shalat", C: "Malas belajar agama", D: "Putus asa saat gagal" }, correct: "B", level: "HOTS", dalil: "" },
+        { id: 12, category: "Bab 6: Surat Al-A'la", question: "'Walladzi qaddara fahada'. Arti kata 'Fahada' adalah...", options: { A: "Lalu Dia memberi petunjuk", B: "Lalu Dia mematikan", C: "Lalu Dia menciptakan", D: "Lalu Dia menyempurnakan" }, correct: "A", level: "Sedang", dalil: "وَٱلَّذِي قَدَّرَ فَهَدَىٰ" },
+        { id: 13, category: "Bab 6: Surat Al-A'la", question: "Mengapa Allah menyuruh Nabi memberikan peringatan dalam surat Al-A'la?", options: { A: "Karena peringatan itu bermanfaat", B: "Agar Nabi mendapat upah", C: "Supaya Nabi terkenal", D: "Agar musuh takut" }, correct: "A", level: "HOTS", dalil: "فَذَكِّرۡ إِن نَّفَعَتِ ٱلذِّكۡرَىٰ" },
+        { id: 14, category: "Bab 7: Qada & Qadar", question: "Iman kepada Qada dan Qadar adalah rukun iman yang ke...", options: { A: "3", B: "4", C: "5", D: "6" }, correct: "D", level: "Mudah", dalil: "" },
+        { id: 15, category: "Bab 7: Qada & Qadar", question: "Ketetapan Allah SWT sejak zaman azali (sebelum alam semesta diciptakan) disebut...", options: { A: "Qadar", B: "Qada", C: "Nasib", D: "Ikhtiar" }, correct: "B", level: "Sedang", dalil: "" },
+        { id: 16, category: "Bab 7: Qada & Qadar", question: "Perwujudan dari ketetapan Allah SWT yang terjadi pada makhluk-Nya disebut...", options: { A: "Qada", B: "Qadar", C: "Doa", D: "Tawakkal" }, correct: "B", level: "Sedang", dalil: "" },
+        { id: 17, category: "Bab 7: Qada & Qadar", question: "Takdir dibagi menjadi dua, yaitu...", options: { A: "Takdir Baik dan Takdir Buruk", B: "Takdir Muallaq dan Takdir Mubram", C: "Takdir Dunia dan Takdir Akhirat", D: "Takdir Besar dan Takdir Kecil" }, correct: "B", level: "Mudah", dalil: "" },
+        { id: 18, category: "Bab 7: Qada & Qadar", question: "Takdir yang masih bisa diubah dengan usaha (ikhtiar) dan doa disebut...", options: { A: "Takdir Mubram", B: "Takdir Muallaq", C: "Takdir Mutlak", D: "Takdir Azali" }, correct: "B", level: "Sedang", dalil: "إِنَّ اللهَ لاَ يُغَيِّرُ مَا بِقَوْمٍ حَتَّى يُغَيِّرُوا مَا بِأَنْفُسِهِمْ" },
+        { id: 19, category: "Bab 7: Qada & Qadar", question: "Berikut ini yang merupakan contoh Takdir Mubram (tidak bisa diubah) adalah...", options: { A: "Kepintaran seseorang", B: "Kekayaan seseorang", C: "Jenis kelamin saat lahir", D: "Kesehatan tubuh" }, correct: "C", level: "Sedang", dalil: "" },
+        { id: 20, category: "Bab 7: Qada & Qadar", question: "Ahmad awalnya kurang pandai matematika, tetapi ia belajar dengan giat setiap hari hingga akhirnya menjadi juara olimpiade. Ini adalah contoh...", options: { A: "Takdir Mubram", B: "Takdir Muallaq", C: "Nasib buruk", D: "Keberuntungan semata" }, correct: "B", level: "HOTS", dalil: "" },
+        { id: 21, category: "Bab 7: Qada & Qadar", question: "Sikap yang benar ketika menerima takdir yang tidak menyenangkan (musibah) adalah...", options: { A: "Mengeluh kepada teman", B: "Menyalahkan orang lain", C: "Sabar dan tawakkal", D: "Putus asa" }, correct: "C", level: "HOTS", dalil: "" },
+        { id: 22, category: "Bab 7: Qada & Qadar", question: "Hikmah beriman kepada Qada dan Qadar adalah...", options: { A: "Membuat kita malas berusaha karena semua sudah diatur", B: "Mendorong semangat berusaha dan tidak sombong saat berhasil", C: "Menjadikan kita takut menghadapi masa depan", D: "Membuat kita pasrah tanpa melakukan apapun" }, correct: "B", level: "HOTS", dalil: "" },
+        { id: 23, category: "Bab 7: Qada & Qadar", question: "Istilah 'Ikhtiar' dalam konsep takdir berarti...", options: { A: "Berserah diri", B: "Berdoa", C: "Usaha sungguh-sungguh", D: "Menerima nasib" }, correct: "C", level: "Mudah", dalil: "" },
+        { id: 24, category: "Bab 7: Qada & Qadar", question: "Setelah berusaha dan berdoa, sikap selanjutnya adalah 'Tawakkal'. Tawakkal artinya...", options: { A: "Menyerahkan segala hasil kepada Allah", B: "Merasa yakin pasti berhasil", C: "Berhenti berusaha di tengah jalan", D: "Memaksa Allah mengabulkan doa" }, correct: "A", level: "Sedang", dalil: "فَإِذَا عَزَمْتَ فَتَوَكَّلْ عَلَى اللَّهِ" },
+        { id: 25, category: "Bab 7: Qada & Qadar", question: "Seseorang yang tidak percaya kepada Qada dan Qadar akan cenderung...", options: { A: "Tenang jiwanya", B: "Mudah stres dan sombong", C: "Dermawan", D: "Disayang Allah" }, correct: "B", level: "HOTS", dalil: "" },
+        { id: 26, category: "Bab 7: Qada & Qadar", question: "Kematian adalah rahasia Allah dan pasti akan datang. Hal ini menunjukkan bahwa manusia itu...", options: { A: "Lemah dan membutuhkan Allah", B: "Bisa hidup selamanya jika berobat", C: "Mampu melawan takdir", D: "Tidak perlu beribadah" }, correct: "A", level: "Sedang", dalil: "كُلُّ نَفْسٍ ذَائِقَةُ الْمَوْتِ" },
+        { id: 27, category: "Bab 8: Peduli Lingkungan", question: "Manusia diciptakan Allah di muka bumi sebagai 'Khalifah', yang artinya...", options: { A: "Penguasa yang bebas berbuat", B: "Pemimpin dan pengelola bumi", C: "Hamba yang hanya beribadah saja", D: "Perusak alam" }, correct: "B", level: "Mudah", dalil: "إِنِّي جَاعِلٌ فِي الْأَرْضِ خَلِيفَةً" },
+        { id: 28, category: "Bab 8: Peduli Lingkungan", question: "Perilaku yang TIDAK mencerminkan sikap peduli lingkungan adalah...", options: { A: "Membuang sampah pada tempatnya", B: "Menanam pohon di pekarangan", C: "Membakar hutan untuk lahan sawit", D: "Menghemat penggunaan air" }, correct: "C", level: "Mudah", dalil: "" },
+        { id: 29, category: "Bab 8: Peduli Lingkungan", question: "Allah melarang manusia berbuat kerusakan di muka bumi. Larangan ini terdapat dalam Al-Qur'an surat...", options: { A: "Al-A'la ayat 1", B: "Al-Fatihah ayat 5", C: "Ar-Rum ayat 41", D: "Al-Ikhlas ayat 1" }, correct: "C", level: "Sedang", dalil: "ظَهَرَ ٱلۡفَسَادُ فِي ٱلۡبَرِّ وَٱلۡبَحۡرِ..." },
+        { id: 30, category: "Bab 8: Peduli Lingkungan", question: "Dalam Surat Ar-Rum ayat 41, disebutkan bahwa kerusakan di darat dan di laut disebabkan oleh...", options: { A: "Bencana alam murni", B: "Ulah tangan manusia", C: "Takdir Allah semata", D: "Gangguan jin" }, correct: "B", level: "Sedang", dalil: "بِمَا كَسَبَتۡ أَيۡدِي ٱلنَّاسِ" },
+        { id: 31, category: "Bab 8: Peduli Lingkungan", question: "Apa tujuan Allah menimpakan sebagian akibat buruk dari perbuatan merusak lingkungan kepada manusia?", options: { A: "Agar manusia menderita selamanya", B: "Agar manusia kembali (ke jalan yang benar)", C: "Karena Allah benci manusia", D: "Untuk menghabisi populasi manusia" }, correct: "B", level: "HOTS", dalil: "لِيُذِيقَهُم بَعۡضَ ٱلَّذِي عَمِلُواْ لَعَلَّهُمۡ يَرۡجِعُونَ" },
+        { id: 32, category: "Bab 8: Peduli Lingkungan", question: "Kegiatan 'Reboisasi' adalah salah satu bentuk akhlak terpuji terhadap alam. Arti Reboisasi adalah...", options: { A: "Penebangan hutan liar", B: "Penghijauan atau penanaman kembali hutan gundul", C: "Pembakaran sampah", D: "Pembangunan gedung bertingkat" }, correct: "B", level: "Mudah", dalil: "" },
+        { id: 33, category: "Bab 8: Peduli Lingkungan", question: "Rahmat melihat keran air di masjid terus mengalir meskipun bak sudah penuh. Sikap Rahmat yang paling tepat adalah...", options: { A: "Membiarkannya karena bukan tugasnya", B: "Melaporkan kepada penjaga masjid nanti saja", C: "Segera menutup keran air tersebut", D: "Memarahi orang yang lupa mematikan" }, correct: "C", level: "HOTS", dalil: "وَلاَ تُسْرِفُواْ إِنَّهُ لاَ يُحِبُّ الْمُسْرِفِينَ" },
+        { id: 34, category: "Bab 8: Peduli Lingkungan", question: "Menghemat energi listrik termasuk cara menjaga lingkungan karena...", options: { A: "Listrik itu gratis", B: "Dapat mengurangi biaya saja", C: "Mengurangi pembakaran bahan bakar fosil yang merusak ozon", D: "Supaya rumah menjadi gelap" }, correct: "C", level: "HOTS", dalil: "" },
+        { id: 35, category: "Bab 8: Peduli Lingkungan", question: "Rasulullah saw. bersabda: 'Kebersihan adalah sebagian dari...'", options: { A: "Kesehatan", B: "Iman", C: "Kekayaan", D: "Kecantikan" }, correct: "B", level: "Mudah", dalil: "النَّظَافَةُ مِنَ الْإِيْمَانِ" },
+        { id: 36, category: "Bab 8: Peduli Lingkungan", question: "Jika kita membuang limbah detergen langsung ke sungai, dampaknya adalah...", options: { A: "Ikan menjadi lebih sehat", B: "Sungai menjadi wangi", C: "Air tercemar dan ekosistem sungai mati", D: "Air sungai menjadi jernih" }, correct: "C", level: "Sedang", dalil: "" },
+        { id: 37, category: "Bab 8: Peduli Lingkungan", question: "Sikap 'Ramah Lingkungan' dalam Islam disebut juga dengan...", options: { A: "Rahmatan lil 'alamin", B: "Amar ma'ruf", C: "Nahi munkar", D: "Fastabiqul khairat" }, correct: "A", level: "Sedang", dalil: "" },
+        { id: 38, category: "Bab 8: Peduli Lingkungan", question: "Salah satu contoh sedekah jariyah yang berhubungan dengan lingkungan adalah...", options: { A: "Memberi makan fakir miskin", B: "Membangun jembatan atau menanam pohon yang bermanfaat", C: "Shalat tahajud", D: "Membaca Al-Qur'an" }, correct: "B", level: "HOTS", dalil: "" },
+        { id: 39, category: "Bab 8: Peduli Lingkungan", question: "Bencana banjir sering terjadi karena ulah manusia yang...", options: { A: "Rajin membersihkan selokan", B: "Membuang sampah sembarangan ke sungai", C: "Membuat biopori", D: "Menjaga hutan lindung" }, correct: "B", level: "Mudah", dalil: "" },
+        { id: 40, category: "Bab 8: Peduli Lingkungan", question: "Inti dari ajaran Islam tentang lingkungan hidup adalah menjaga keseimbangan alam agar...", options: { A: "Dapat dieksploitasi habis-habisan", B: "Terjaga keberlangsungannya untuk generasi mendatang", C: "Menjadi tempat wisata berbayar", D: "Terlihat indah untuk foto saja" }, correct: "B", level: "HOTS", dalil: "" }
+      ];
+
+      // --- STATE & VARIABLES ---
+      let userData = { name: '', class: '6A' };
+      let currentIdx = 0;
+      let score = 0;
+      let userAnswers = {};
+      let timerSeconds = 0;
+      let timerInterval;
+      
+      // --- NAVIGASI ---
+      function showPage(pageId) {
+        document.querySelectorAll('div[id^="page-"]').forEach(el => el.classList.add('hidden'));
+        document.getElementById(pageId).classList.remove('hidden');
+      }
+
+      function startQuiz() {
+        const name = document.getElementById('input-nama').value.trim();
+        const kelas = document.getElementById('input-kelas').value;
+        
+        if (!name) {
+          alert("Mohon isi nama terlebih dahulu!");
+          return;
+        }
+
+        userData = { name, class: kelas };
+        document.getElementById('display-nama').textContent = userData.name;
+        document.getElementById('display-kelas').textContent = userData.class;
+        
+        // Reset
+        currentIdx = 0;
+        userAnswers = {};
+        timerSeconds = 0;
+        
+        // Start Timer
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          timerSeconds++;
+          const mins = Math.floor(timerSeconds / 60);
+          const secs = timerSeconds % 60;
+          document.getElementById('timer').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }, 1000);
+
+        showPage('page-quiz');
+        renderQuestion();
+      }
+
+      // --- LOGIKA KUIS ---
+      function renderQuestion() {
+        const q = questionsDatabase[currentIdx];
+        
+        // Update Info Soal
+        document.getElementById('current-number').textContent = currentIdx + 1;
+        document.getElementById('total-number').textContent = '/' + questionsDatabase.length;
+        document.getElementById('progress-bar').style.width = ((currentIdx + 1) / questionsDatabase.length * 100) + '%';
+        
+        // Update Konten Soal
+        document.getElementById('question-text').textContent = q.question;
+        document.getElementById('badge-level').textContent = q.level;
+        document.getElementById('badge-level').className = `inline-block px-3 py-1 rounded-full text-xs font-semibold ${q.level === 'HOTS' ? 'bg-red-100 text-red-600' : q.level === 'Sedang' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-600'}`;
+        document.getElementById('badge-category').textContent = q.category;
+        
+        // Dalil
+        const dalilBox = document.getElementById('dalil-box');
+        if (q.dalil) {
+          dalilBox.classList.remove('hidden');
+          document.getElementById('dalil-text').textContent = q.dalil;
+        } else {
+          dalilBox.classList.add('hidden');
+        }
+
+        // Render Opsi
+        const optsContainer = document.getElementById('options-container');
+        optsContainer.innerHTML = '';
+        
+        Object.entries(q.options).forEach(([key, val]) => {
+          const btn = document.createElement('button');
+          const isSelected = userAnswers[currentIdx] === key;
+          
+          btn.className = `p-4 rounded-xl border-2 text-left transition-all relative ${
+            isSelected 
+            ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-md' 
+            : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50 text-gray-700'
+          }`;
+          
+          btn.onclick = () => {
+            userAnswers[currentIdx] = key;
+            renderQuestion(); // Re-render to show selection
+          };
+          
+          btn.innerHTML = `
+            <span class="absolute top-4 left-4 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border ${
+              isSelected ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-gray-500 border-gray-300'
+            }">${key}</span>
+            <span class="ml-8 block">${val}</span>
+          `;
+          optsContainer.appendChild(btn);
+        });
+
+        // Button Navigasi
+        document.getElementById('btn-prev').disabled = currentIdx === 0;
+        if (currentIdx === questionsDatabase.length - 1) {
+          document.getElementById('btn-next').classList.add('hidden');
+          document.getElementById('btn-finish').classList.remove('hidden');
+        } else {
+          document.getElementById('btn-next').classList.remove('hidden');
+          document.getElementById('btn-finish').classList.add('hidden');
+        }
+      }
+
+      function nextQuestion() {
+        if (currentIdx < questionsDatabase.length - 1) {
+          currentIdx++;
+          renderQuestion();
+        }
+      }
+
+      function prevQuestion() {
+        if (currentIdx > 0) {
+          currentIdx--;
+          renderQuestion();
+        }
+      }
+
+      function finishQuiz() {
+        clearInterval(timerInterval);
+        document.getElementById('loading-overlay').classList.remove('hidden');
+
+        // Hitung Skor
+        let correctCount = 0;
+        questionsDatabase.forEach((q, idx) => {
+          if (userAnswers[idx] === q.correct) correctCount++;
+        });
+        const finalScore = (correctCount / questionsDatabase.length) * 100;
+
+        // Kirim ke Google Sheet
+        const dataToSend = {
+          nama: userData.name,
+          kelas: userData.class,
+          skor: finalScore,
+          waktu: timerSeconds,
+          tanggal: new Date().toLocaleDateString()
+        };
+
+        google.script.run
+          .withSuccessHandler((leaderboardData) => {
+            renderResult(finalScore, leaderboardData);
+            document.getElementById('loading-overlay').classList.add('hidden');
+          })
+          .withFailureHandler((err) => {
+            alert("Gagal menyimpan nilai: " + err);
+            document.getElementById('loading-overlay').classList.add('hidden');
+            renderResult(finalScore, []); // Tetap tampilkan hasil meski gagal save
+          })
+          .simpanNilai(dataToSend);
+      }
+
+      // --- HASIL & LEADERBOARD ---
+      let savedLeaderboard = [];
+
+      function renderResult(score, leaderboardData) {
+        savedLeaderboard = leaderboardData;
+        showPage('page-result');
+        
+        const isPassed = score >= 75;
+        document.getElementById('final-score').textContent = Math.round(score);
+        document.getElementById('res-nama').textContent = userData.name;
+        document.getElementById('res-kelas').textContent = userData.class;
+        
+        const mins = Math.floor(timerSeconds / 60);
+        const secs = timerSeconds % 60;
+        document.getElementById('res-waktu').textContent = `${mins}m ${secs}d`;
+        
+        const statusEl = document.getElementById('res-status');
+        const headerEl = document.getElementById('result-header');
+        const iconEl = document.getElementById('result-icon');
+        const titleEl = document.getElementById('result-title');
+        const msgEl = document.getElementById('result-message');
+
+        if (isPassed) {
+          statusEl.textContent = 'LULUS (Tuntas)';
+          statusEl.className = 'font-bold text-emerald-600';
+          headerEl.className = 'h-32 bg-emerald-500 flex items-center justify-center';
+          iconEl.className = 'fas fa-check-circle text-white text-6xl opacity-80';
+          titleEl.textContent = 'Alhamdulillah, Selamat!';
+          msgEl.textContent = `Ananda ${userData.name} telah menyelesaikan ujian dengan sangat baik.`;
+        } else {
+          statusEl.textContent = 'BELUM TUNTAS';
+          statusEl.className = 'font-bold text-red-600';
+          headerEl.className = 'h-32 bg-red-500 flex items-center justify-center';
+          iconEl.className = 'fas fa-times-circle text-white text-6xl opacity-80';
+          titleEl.textContent = 'Tetap Semangat!';
+          msgEl.textContent = `Ananda ${userData.name}, jangan menyerah. Pelajari lagi materi Bab 6-8 ya.`;
+        }
+      }
+
+      function showLeaderboard() {
+        showPage('page-leaderboard');
+        const tbody = document.getElementById('leaderboard-body');
+        tbody.innerHTML = '';
+        
+        if (savedLeaderboard.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-gray-500">Belum ada data.</td></tr>';
+          return;
+        }
+
+        savedLeaderboard.forEach((item, idx) => {
+          const mins = Math.floor(item.waktu / 60);
+          const secs = item.waktu % 60;
+          const isMe = item.nama === userData.name && Math.abs(item.skor - parseFloat(document.getElementById('final-score').textContent)) < 0.1;
+
+          const tr = document.createElement('tr');
+          tr.className = `border-b border-gray-50 hover:bg-emerald-50 transition-colors ${isMe ? 'bg-yellow-50' : ''}`;
+          tr.innerHTML = `
+            <td class="p-4 text-gray-500 font-medium">${idx + 1}</td>
+            <td class="p-4 font-semibold text-gray-700">${item.nama}</td>
+            <td class="p-4 text-gray-600"><span class="bg-gray-100 px-2 py-1 rounded text-xs">${item.kelas}</span></td>
+            <td class="p-4 text-gray-500 font-mono text-sm">${mins}:${secs < 10 ? '0' : ''}${secs}</td>
+            <td class="p-4 text-right"><span class="font-bold text-emerald-600 text-lg">${Math.round(item.skor)}</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    </script>
+  </body>
+</html>
